@@ -9,7 +9,7 @@ set -u
 TOOL_NAME="get_sysinfo"
 
 # Version of this tool
-VERSION="3.1"
+VERSION="3.5"
 
 # Help of this tool
 usage () {
@@ -57,6 +57,8 @@ get_sysinfo(){
     host=$( hostname )
     kern=$( uname -r )
     virt=$( hostnamectl | awk '/Virtualization/ {print $2}' )
+    disk=$( fdisk -l | grep 'Disk /dev/' | awk -F'Disk /dev/' '{print $2}' | sed 's/^.*://g' | sed 's/,.*//g' | sed 's/^[ \t]*//;s/[ \t]*$//' )
+    avail=$( df -h / | awk '/2/ {print $4}' )
 }
 
 showinfo_zhcn(){
@@ -68,17 +70,19 @@ showinfo_zhcn(){
 	echo "#                                      #"
 	echo "########################################"
 	echo 
+	echo "主机名称              : ${host}"
 	echo "CPU型号               : ${cname}"
 	echo "CPU核心数             : ${cores}"
 	echo "CPU频率               : ${freq} MHz"
 	echo "运行内存RAM           : ${tram} MB"
 	echo "虚拟内存SWAP          : ${swap} MB"
+	echo "硬盘总空间            : ${disk}"
+	echo "磁盘可用空间          : ${avail}"
 	echo "开机连续运行时间      : ${up}"
 	echo "平均负荷              : ${load}"
 	echo "操作系统              : ${opsy}"
 	echo "系统架构              : ${arch} (${lbit} Bit)"
 	echo "内核版本              : ${kern}"
-	echo "主机名称              : ${host}"
 	echo "虚拟化架构            : ${virt}"
 	echo -n "公网IPv4地址          : "
 	echo $( get_ipv4_pub )
@@ -107,19 +111,21 @@ echo "#        Get System Information        #"
 echo "#                                      #"
 echo "########################################"
 echo 
-echo "CPU model            : ${cname}"
-echo "Number of cores      : ${cores}"
-echo "CPU frequency        : ${freq} MHz"
-echo "Total amount of ram  : ${tram} MB"
-echo "Total amount of swap : ${swap} MB"
-echo "System uptime        : ${up}"
-echo "Load average         : ${load}"
-echo "OS                   : ${opsy}"
-echo "Architecture         : ${arch} (${lbit} Bit)"
-echo "Kernel               : ${kern}"
-echo "Hostname             : ${host}"
-echo "Virtualization       : ${virt}"
-echo -n "IPv4 address         : "
+echo "Hostname                       : ${host}"
+echo "CPU model                      : ${cname}"
+echo "Number of cores                : ${cores}"
+echo "CPU frequency                  : ${freq} MHz"
+echo "Total amount of RAM            : ${tram} MB"
+echo "Total amount of SWAP           : ${swap} MB"
+echo "Disk space                     : ${disk}"
+echo "Disk partition free space      : ${avail}"
+echo "System uptime                  : ${up}"
+echo "Load average                   : ${load}"
+echo "Operating system               : ${opsy}"
+echo "Architecture                   : ${arch} (${lbit} Bit)"
+echo "Kernel                         : ${kern}"
+echo "Virtualization                 : ${virt}"
+echo -n "IPv4 address                   : "
 echo $( get_ipv4_pub )
 echo
 echo "########################################"
