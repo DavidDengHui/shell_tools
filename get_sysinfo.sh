@@ -9,7 +9,7 @@ set -u
 TOOL_NAME="get_sysinfo"
 
 # Version of this tool
-VERSION="2.2"
+VERSION="3.1"
 
 # Help of this tool
 usage () {
@@ -17,6 +17,7 @@ usage () {
     echo "Options:"
     echo "  -h, --help          Display this help and exit"
     echo "  -v, --version       Display version and exit"
+    echo "  -c, --zhcn          Display information with Chinese"
     exit 0
 }
 
@@ -58,11 +59,41 @@ get_sysinfo(){
     virt=$( hostnamectl | awk '/Virtualization/ {print $2}' )
 }
 
+showinfo_zhcn(){
+	get_sysinfo
+	echo "########################################"
+	echo "#                                      #"
+	echo "#        Get System Information        #"
+	echo "#           获取系统信息参数           #"
+	echo "#                                      #"
+	echo "########################################"
+	echo 
+	echo "CPU型号               : ${cname}"
+	echo "CPU核心数             : ${cores}"
+	echo "CPU频率               : ${freq} MHz"
+	echo "运行内存RAM           : ${tram} MB"
+	echo "虚拟内存SWAP          : ${swap} MB"
+	echo "开机连续运行时间      : ${up}"
+	echo "平均负荷              : ${load}"
+	echo "操作系统              : ${opsy}"
+	echo "系统架构              : ${arch} (${lbit} Bit)"
+	echo "内核版本              : ${kern}"
+	echo "主机名称              : ${host}"
+	echo "虚拟化架构            : ${virt}"
+	echo -n "公网IPv4地址          : "
+	echo $( get_ipv4_pub )
+	echo
+	echo "########################################"
+	echo 
+	exit 0
+}
+
 # Handle the command line arguments, if any.
 while test $# -gt 0; do
     case "$1" in
         -h|--help) usage ;;
         -v|--version) echo "$TOOL_NAME $VERSION"; exit 0 ;;
+        -c|--zhcn) showinfo_zhcn ;;
         --) shift; break ;;
         *) fail "unrecognized option '$1'";;
     esac
@@ -71,9 +102,9 @@ test $# -gt 0 && fail "extra operand '$1'"
 
 get_sysinfo
 echo "########################################"
-echo "##                                    ##"
-echo "##       Get System Information       ##"
-echo "##                                    ##"
+echo "#                                      #"
+echo "#        Get System Information        #"
+echo "#                                      #"
 echo "########################################"
 echo 
 echo "CPU model            : ${cname}"
@@ -84,7 +115,7 @@ echo "Total amount of swap : ${swap} MB"
 echo "System uptime        : ${up}"
 echo "Load average         : ${load}"
 echo "OS                   : ${opsy}"
-echo "Arch                 : ${arch} (${lbit} Bit)"
+echo "Architecture         : ${arch} (${lbit} Bit)"
 echo "Kernel               : ${kern}"
 echo "Hostname             : ${host}"
 echo "Virtualization       : ${virt}"
