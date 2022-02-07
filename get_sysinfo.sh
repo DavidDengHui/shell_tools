@@ -2,7 +2,6 @@
 #
 # Author: David Deng
 # Url: https://covear.top
-#
 
 set -u
 
@@ -10,7 +9,7 @@ set -u
 TOOL_NAME="get_sysinfo"
 
 # Version of this tool
-VERSION="2.1"
+VERSION="2.2"
 
 # Help of this tool
 usage () {
@@ -42,6 +41,23 @@ get_ipv4_pub(){
 	echo -n $IP
 }
 
+# Get system information
+get_sysinfo(){
+    cname=$( awk -F: '/model name/ {name=$2} END {print name}' /proc/cpuinfo | sed 's/^[ \t]*//;s/[ \t]*$//' )
+    cores=$( awk -F: '/model name/ {core++} END {print core}' /proc/cpuinfo )
+    freq=$( awk -F: '/cpu MHz/ {freq=$2} END {print freq}' /proc/cpuinfo | sed 's/^[ \t]*//;s/[ \t]*$//' )
+    tram=$( free -m | awk '/Mem/ {print $2}' )
+    swap=$( free -m | awk '/Swap/ {print $2}' )
+    up=$( awk '{a=$1/86400;b=($1%86400)/3600;c=($1%3600)/60;d=$1%60} {printf("%ddays, %d:%d:%d\n",a,b,c,d)}' /proc/uptime )
+    load=$( w | head -1 | awk -F'load average:' '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//' )
+    opsy=$( get_opsy )
+    arch=$( uname -m )
+    lbit=$( getconf LONG_BIT )
+    host=$( hostname )
+    kern=$( uname -r )
+    virt=$( hostnamectl | awk '/Virtualization/ {print $2}' )
+}
+
 # Handle the command line arguments, if any.
 while test $# -gt 0; do
     case "$1" in
@@ -53,24 +69,25 @@ while test $# -gt 0; do
 done
 test $# -gt 0 && fail "extra operand '$1'"
 
+get_sysinfo
 echo "########################################"
 echo "##                                    ##"
 echo "##       Get System Information       ##"
 echo "##                                    ##"
 echo "########################################"
 echo 
-echo "CPU model            : $( awk -F: '/model name/ {name=$2} END {print name}' /proc/cpuinfo | sed 's/^[ \t]*//;s/[ \t]*$//' )"
-echo "Number of cores      : $( awk -F: '/model name/ {core++} END {print core}' /proc/cpuinfo )"
-echo "CPU frequency        : $( awk -F: '/cpu MHz/ {freq=$2} END {print freq}' /proc/cpuinfo | sed 's/^[ \t]*//;s/[ \t]*$//' ) MHz"
-echo "Total amount of ram  : $( free -m | awk '/Mem/ {print $2}' ) MB"
-echo "Total amount of swap : $( free -m | awk '/Swap/ {print $2}' ) MB"
-echo "System uptime        : $( awk '{a=$1/86400;b=($1%86400)/3600;c=($1%3600)/60;d=$1%60} {printf("%ddays, %d:%d:%d\n",a,b,c,d)}' /proc/uptime )"
-echo "Load average         : $( w | head -1 | awk -F'load average:' '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//' )"
-echo "OS                   : $( get_opsy )"
-echo "Architecture         : $( uname -m ) ($( getconf LONG_BIT ) Bit)"
-echo "Kernel               : $( uname -r )"
-echo "Hostname             : $( hostname )"
-echo "Virtualization       : $( hostnamectl | awk '/Virtualization/ {print $2}' )"
+echo "CPU model            : ${cname}"
+echo "Number of cores      : ${cores}"
+echo "CPU frequency        : ${freq} MHz"
+echo "Total amount of ram  : ${tram} MB"
+echo "Total amount of swap : ${swap} MB"
+echo "System uptime        : ${up}"
+echo "Load average         : ${load}"
+echo "OS                   : ${opsy}"
+echo "Arch                 : ${arch} (${lbit} Bit)"
+echo "Kernel               : ${kern}"
+echo "Hostname             : ${host}"
+echo "Virtualization       : ${virt}"
 echo -n "IPv4 address         : "
 echo $( get_ipv4_pub )
 echo
