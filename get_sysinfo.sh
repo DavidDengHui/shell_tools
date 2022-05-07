@@ -58,7 +58,7 @@ get_sysinfo(){
     kern=$( uname -r )
     virt=$( hostnamectl | awk '/Virtualization/ {print $2}' )
     disk=$( fdisk -l | grep 'Disk /dev/' | awk -F'Disk /dev/' '{print $2}' | sed 's/^.*://g' | sed 's/,.*//g' | sed 's/^[ \t]*//;s/[ \t]*$//' )
-    avail=$( df -h / | awk '/2/ {print $4}' )
+    avail=$( df -h / | awk '/1/ {print $4}' )
 }
 
 showinfo_zhcn(){
