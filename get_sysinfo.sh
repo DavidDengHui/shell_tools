@@ -56,7 +56,7 @@ get_sysinfo(){
 	lbit=$( getconf LONG_BIT )
 	host=$( hostname )
 	kern=$( uname -r )
-	disk=$( $( whereis fdisk | awk '{printf $2}' ) -l | grep "Disk $( df -h / | awk '/1/ {print $1}' | sed '$s/[0-9]$//' )" | awk '{printf $3 " " $4}' | sed 's/,//g' )
+	disk=$( if [ $(id -u) == 0 ]; then $( whereis fdisk | awk '{printf $2}' ) -l | grep "Disk $( df -h / | awk '/1/ {print $1}' | sed '$s/[0-9]$//' )" | awk '{printf $3 " " $4}' | sed 's/,//g'; else df -h / | awk '/1/ {print $2}'; fi )
 	avail=$( df -h / | awk '/1/ {print $4}' )
 }
 
@@ -82,9 +82,9 @@ showinfo_zhcn(){
     echo "操作系统              : ${opsy}"
     echo "系统架构              : ${arch} (${lbit} Bit)"
     echo "内核版本              : ${kern}"
-    echo "虚拟化架构            : $(virt_what)"
+    echo "虚拟化架构            : $(get_virt)"
     echo -n "公网IPv4地址          : "
-    echo $( get_ipv4_pub )
+    echo $(get_ipv4_pub)
     echo
     echo "########################################"
     echo 
@@ -106,7 +106,7 @@ virt_what() {
 
 	use_sysctl() {
 		# Lacking /proc, on some systems sysctl can be used instead.
-		OS=$(uname) || fail "failed to get operating system name"
+		OS=$(uname) || echo "failed to get operating system name"
 
 		[ "$OS" = "OpenBSD" ]
 	}
@@ -132,14 +132,14 @@ virt_what() {
 				# Deliberately undocumented: used for 'make check'.
 				root=$(echo "$1" | sed 's/.*=//')
 				shift 1
-				test -z "$root" && fail "--test-root option requires a value"
+				test -z "$root" && echo "--test-root option requires a value"
 				;;
 			-v|--version) echo "$VERSION"; exit 0 ;;
 			--) shift; break ;;
-			*) fail "unrecognized option '$1'";;
+			*) echo "unrecognized option '$1'";;
 		esac
 	done
-	test $# -gt 0 && fail "extra operand '$1'"
+	test $# -gt 0 && echo "extra operand '$1'"
 
 	# Add /sbin and /usr/sbin to the path so we can find system
 	# binaries like dmidecode.
@@ -150,16 +150,17 @@ virt_what() {
 	export PATH
 
 	# Check we're running as root.
-	EFFUID=$(id -u) || fail "failed to get current user id"
+	EFFUID=$(id -u) || echo "failed to get current user id"
 
 	if [ "x$root" = "x" ] && [ "$EFFUID" -ne 0 ]; then
-		fail "this script must be run as root"
+		echo "(this script must be run as root or 'sudo') "
+		exit 1
 	fi
 
 	# Try to locate the CPU-ID helper program
 	CPUID_HELPER=$(which virt-what-cpuid-helper 2>/dev/null)
 	if [ -z "$CPUID_HELPER" ] ; then
-		fail "virt-what-cpuid-helper program not found in \$PATH"
+		echo "virt-what-cpuid-helper program not found in \$PATH"
 	fi
 
 	# Many fullvirt hypervisors give an indication through CPUID.  Use the
@@ -504,6 +505,14 @@ virt_what() {
 	fi
 }
 
+get_virt() {
+	chk_virt=$(virt_what)
+	if [ "$chk_virt" == "" ]; then 
+		echo "UNKNOW (this script must be run as root)"
+	else 
+		echo $chk_virt
+	fi
+}
 # Handle the command line arguments, if any.
 while test $# -gt 0; do
 	case "$1" in
@@ -536,7 +545,7 @@ echo "Load average                   : ${load}"
 echo "Operating system               : ${opsy}"
 echo "Architecture                   : ${arch} (${lbit} Bit)"
 echo "Kernel                         : ${kern}"
-echo "Virtualization                 : $(virt_what)"
+echo "Virtualization                 : $(get_virt)"
 echo -n "IPv4 address                   : "
 echo $(get_ipv4_pub)
 echo
