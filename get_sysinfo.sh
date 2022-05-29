@@ -57,7 +57,7 @@ get_sysinfo(){
     host=$( hostname )
     kern=$( uname -r )
     virt=$( hostnamectl | awk '/Virtualization/ {print $2}' )
-    disk=$( $( whereis fdisk | awk '{printf $2}' ) -l | grep 'Disk /dev/' | awk '{printf $3 " " $4}' | sed 's/,//g' )
+    disk=$( $( whereis fdisk | awk '{printf $2}' ) -l | grep "Disk $( df -h / | awk '/1/ {print $1}' | sed '$s/[0-9]$//' )" | awk '{printf $3 " " $4}' | sed 's/,//g' )
     avail=$( df -h / | awk '/1/ {print $4}' )
 }
 
