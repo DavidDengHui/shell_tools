@@ -68,7 +68,7 @@ get_virt() {
 	root=''
 	EFFUID=$(id -u) || echo "failed to get current user id"
 	if [ "x$root" = "x" ] && [ "$EFFUID" -ne 0 ]; then
-		echo $( hostnamectl | awk '/Virtualization/ {print $2}' )
+		echo $( hostnamectl | awk '/Virtualization/ {print $2}' )" (For more accurate information, please use root or sudo)"
 		exit 1
 	fi
 	if command -v virt-what >/dev/null 2>&1; then
