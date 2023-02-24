@@ -76,25 +76,29 @@ get_virt() {
 	elif command -v dnf >/dev/null 2>&1; then
 		echo "Installing virt-what..."
 		sudo dnf -y install virt-what
-		echo "Check Virtualization: "$(sudo virt-what)
+		clear
+		echo "Checking Virtualization: "$(sudo virt-what)
 		LET_CLEAR=1
 		showinfo
 	elif command -v yum >/dev/null 2>&1; then
 		echo "Installing virt-what..."
 		sudo yum -y install virt-what
-		echo "Check Virtualization: "$(sudo virt-what)
+		clear
+		echo "Checking Virtualization: "$(sudo virt-what)
 		LET_CLEAR=1
 		showinfo
 	elif command -v apt-get >/dev/null 2>&1; then
 		echo "Installing virt-what..."
 		sudo apt-get -y install virt-what
-		echo "Check Virtualization: "$(sudo virt-what)
+		clear
+		echo "Checking Virtualization: "$(sudo virt-what)
 		LET_CLEAR=1
 		showinfo
 	elif command -v pkg >/dev/null 2>&1; then
 		echo "Installing virt-what..."
 		sudo pkg install -y virt-what
-		echo "Check Virtualization: "$(sudo virt-what)
+		clear
+		echo "Checking Virtualization: "$(sudo virt-what)
 		LET_CLEAR=1
 		showinfo
 	else
@@ -105,12 +109,12 @@ get_virt() {
 
 showinfo_zhcn() {
 	make_info
-	echo -e "########################################"
-	echo -e "#                                      #"
-	echo -e "#        Get System Information        #"
-	echo -e "#           获取系统信息参数\t\t#"
-	echo -e "#                                      #"
-	echo -e "########################################"
+	echo -e "################################################"
+	echo -e "#\t\t\t\t\t\t#"
+	echo -e "#\t     Get System Information\t\t#"
+	echo -e "#\t\t获取系统信息参数\t\t#"
+	echo -e "#\t\t\t\t\t\t#"
+	echo -e "################################################"
 	echo -e 
 	echo -e "主机名称\t\t: ${host}"
 	echo -e "CPU型号\t\t\t: ${cname}"
@@ -159,6 +163,9 @@ showinfo() {
 	echo "Operating system               : ${opsy}"
 	echo "Architecture                   : ${arch} (${lbit} Bit)"
 	echo "Kernel                         : ${kern}"
+	if [ $(id -u) -eq 0 ] && !(command -v virt-what >/dev/null 2>&1) ; then
+		echo -n "Getting virt-what..."
+	fi	
 	echo "Virtualization                 : $(get_virt)"
 	if [ $LET_CLEAR == 1 ]; then 
 		LET_CLEAR=0
