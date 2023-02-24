@@ -12,6 +12,7 @@ TOOL_NAME="get_sysinfo"
 VERSION="4.0"
 
 LET_CLEAR=0
+ZHCN=0
 
 # Help of this tool
 usage () {
@@ -68,41 +69,30 @@ get_virt() {
 	root=''
 	EFFUID=$(id -u) || echo "failed to get current user id"
 	if [ "x$root" = "x" ] && [ "$EFFUID" -ne 0 ]; then
-		echo $( hostnamectl | awk '/Virtualization/ {print $2}' )" (For more accurate information, please use root or sudo)"
+		echo -n $( hostnamectl | awk '/Virtualization/ {print $2}' )" "
+		if [ $ZHCN == 1 ]; then echo "（如需获取更准确的信息，请使用sudo权限或者root用户）"; else echo "(For more accurate information, please use root or sudo)"; fi 
 		exit 1
 	fi
 	if command -v virt-what >/dev/null 2>&1; then
 		echo $(sudo virt-what)
-	elif command -v dnf >/dev/null 2>&1; then
-		echo "Installing virt-what..."
-		sudo dnf -y install virt-what
-		clear
-		echo "Checking Virtualization: "$(sudo virt-what)
+	else 
+		if command -v dnf >/dev/null 2>&1; then
+			sudo dnf -y install virt-what
+		elif command -v yum >/dev/null 2>&1; then
+			sudo yum -y install virt-what
+		elif command -v apt-get >/dev/null 2>&1; then
+			sudo apt-get -y install virt-what
+		elif command -v pkg >/dev/null 2>&1; then
+			sudo pkg install -y virt-what
+		fi
 		LET_CLEAR=1
-		showinfo
-	elif command -v yum >/dev/null 2>&1; then
-		echo "Installing virt-what..."
-		sudo yum -y install virt-what
-		clear
-		echo "Checking Virtualization: "$(sudo virt-what)
-		LET_CLEAR=1
-		showinfo
-	elif command -v apt-get >/dev/null 2>&1; then
-		echo "Installing virt-what..."
-		sudo apt-get -y install virt-what
-		clear
-		echo "Checking Virtualization: "$(sudo virt-what)
-		LET_CLEAR=1
-		showinfo
-	elif command -v pkg >/dev/null 2>&1; then
-		echo "Installing virt-what..."
-		sudo pkg install -y virt-what
-		clear
-		echo "Checking Virtualization: "$(sudo virt-what)
-		LET_CLEAR=1
-		showinfo
-	else
-		echo $( hostnamectl | awk '/Virtualization/ {print $2}' )
+		if [ $ZHCN == 1 ]; then 
+			echo -e "\n测试virt-what: $(sudo virt-what)\n"; 
+			showinfo_zhcn; 
+		else 
+			echo -e "\nChecking virt-what: $(sudo virt-what)\n"; 
+			showinfo; 
+		fi 
 	fi
 	exit 1
 }
@@ -129,6 +119,9 @@ showinfo_zhcn() {
 	echo -e "操作系统\t\t: ${opsy}"
 	echo -e "系统架构\t\t: ${arch} (${lbit} Bit)"
 	echo -e "内核版本\t\t: ${kern}"
+	if [ $(id -u) -eq 0 ] && !(command -v virt-what >/dev/null 2>&1) ; then
+		echo "正在安装插件virt-what..."
+	fi	
 	echo -e "虚拟化架构\t\t: $(get_virt)"
 	if [ $LET_CLEAR == 1 ]; then 
 		LET_CLEAR=0
@@ -164,8 +157,8 @@ showinfo() {
 	echo "Architecture                   : ${arch} (${lbit} Bit)"
 	echo "Kernel                         : ${kern}"
 	if [ $(id -u) -eq 0 ] && !(command -v virt-what >/dev/null 2>&1) ; then
-		echo -n "Getting virt-what..."
-	fi	
+		echo "Getting virt-what..."
+	fi
 	echo "Virtualization                 : $(get_virt)"
 	if [ $LET_CLEAR == 1 ]; then 
 		LET_CLEAR=0
@@ -182,10 +175,10 @@ showinfo() {
 # Handle the command line arguments, if any.
 while test $# -gt 0; do
 	case "$1" in
-		-h|--help) usage ;;
-		-v|--version) echo "$TOOL_NAME $VERSION"; exit 0 ;;
-		-c|--zhcn) showinfo_zhcn ;;
-		--) shift; break ;;
+		-h|--help) usage;;
+		-v|--version) echo "$TOOL_NAME $VERSION"; exit 0;;
+		-c|--zhcn) ZHCN=1; showinfo_zhcn;;
+		--) shift; break;;
 		*) fail "unrecognized option '$1'";;
 	esac
 done
