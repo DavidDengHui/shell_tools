@@ -9,7 +9,7 @@ set -u
 TOOL_NAME="get_sysinfo"
 
 # Version of this tool
-VERSION="4.3"
+VERSION="4.4"
 
 LET_CLEAR=0
 
@@ -49,8 +49,8 @@ make_info() {
 	cname=$( awk -F: '/model name/ {name=$2} END {print name}' /proc/cpuinfo | sed 's/^[ \t]*//;s/[ \t]*$//' )
 	cores=$( awk -F: '/model name/ {core++} END {print core}' /proc/cpuinfo )
 	freq=$( awk -F: '/cpu MHz/ {freq=$2} END {print freq}' /proc/cpuinfo | sed 's/^[ \t]*//;s/[ \t]*$//' )
-	tram=$( free -m | awk '/内存/ {print $2}' ) || tram=$( free -m | awk '/Mem/ {print $2}' )
-	swap=$( free -m | awk '/交换/ {print $2}' ) || swap=$( free -m | awk '/Swap/ {print $2}' )
+	tram=$( free -m | awk 'NR==2 {print $2}' )
+	swap=$( free -m | awk 'NR==3 {print $2}' )
 	up=$( awk '{a=$1/86400;b=($1%86400)/3600;c=($1%3600)/60;d=$1%60} {printf("%ddays, %d:%d:%d\n",a,b,c,d)}' /proc/uptime )
 	load=$( w | head -1 | awk -F'load average:' '{print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//' )
 	opsy=$( get_opsy )
@@ -114,7 +114,7 @@ showinfo_zhcn() {
 	echo -e 
 	echo -e "主机名称\t\t: ${host}"
 	echo -e "CPU型号\t\t\t: ${cname}"
-	echo -e "CPU核心数\t\t: ${cores} 核"
+	echo -e "CPU核心数\t\t: ${cores}核"
 	echo -e "CPU频率\t\t\t: ${freq} MHz"
 	echo -e "运行内存RAM\t\t: ${tram} MB"
 	echo -e "虚拟内存SWAP\t\t: ${swap} MB"
