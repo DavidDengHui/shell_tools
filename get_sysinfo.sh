@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: David Deng
-# Url: https://hnest.eu.org
+# Url: https://covear.top
 
 set -u
 
@@ -9,7 +9,7 @@ set -u
 TOOL_NAME="get_sysinfo"
 
 # Version of this tool
-VERSION="4.4"
+VERSION="4.5"
 
 LET_CLEAR=0
 
@@ -105,16 +105,16 @@ get_virt() {
 
 showinfo_zhcn() {
 	make_info
-	echo -e "########################################"
-	echo -e "#                                      #"
-	echo -e "#        Get System Information        #"
-	echo -e "#           获取系统信息参数\t\t#"
-	echo -e "#                                      #"
-	echo -e "########################################"
+	echo -e "#########################################"
+	echo -e "#\t\t\t\t\t#"
+	echo -e "#\tGet System Information\t\t#"
+	echo -e "#\t获取系统信息参数\t\t#"
+	echo -e "#\t\t\t\t\t#"
+	echo -e "#########################################"
 	echo -e 
 	echo -e "主机名称\t\t: ${host}"
 	echo -e "CPU型号\t\t\t: ${cname}"
-	echo -e "CPU核心数\t\t: ${cores}核"
+	echo -e "CPU核心数\t\t: ${cores} 核"
 	echo -e "CPU频率\t\t\t: ${freq} MHz"
 	echo -e "运行内存RAM\t\t: ${tram} MB"
 	echo -e "虚拟内存SWAP\t\t: ${swap} MB"
@@ -133,7 +133,7 @@ showinfo_zhcn() {
 	echo -e -n "公网IPv4地址\t\t: "
 	echo -e $(get_ipv4_pub)
 	echo -e
-	echo -e "########################################"
+	echo -e "#########################################"
 	echo -e 
 	exit 0
 }
