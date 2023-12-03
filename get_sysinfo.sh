@@ -9,7 +9,7 @@ set -u
 TOOL_NAME="get_sysinfo"
 
 # Version of this tool
-VERSION="4.1"
+VERSION="4.2"
 
 LET_CLEAR=0
 
@@ -114,7 +114,7 @@ showinfo_zhcn() {
 	echo -e 
 	echo -e "主机名称\t\t: ${host}"
 	echo -e "CPU型号\t\t\t: ${cname}"
-	echo -e "CPU核心数\t\t: ${cores}"
+	echo -e "CPU核心数\t\t: ${cores} 核"
 	echo -e "CPU频率\t\t\t: ${freq} MHz"
 	echo -e "运行内存RAM\t\t: ${tram} MB"
 	echo -e "虚拟内存SWAP\t\t: ${swap} MB"
@@ -148,7 +148,7 @@ showinfo() {
 	echo 
 	echo "Hostname                       : ${host}"
 	echo "CPU model                      : ${cname}"
-	echo "Number of cores                : ${cores}"
+	echo "Number of cores                : ${cores} Cores"
 	echo "CPU frequency                  : ${freq} MHz"
 	echo "Total amount of RAM            : ${tram} MB"
 	echo "Total amount of SWAP           : ${swap} MB"
