@@ -9,7 +9,7 @@ set -u
 TOOL_NAME="get_sysinfo"
 
 # Version of this tool
-VERSION="4.2"
+VERSION="4.3"
 
 LET_CLEAR=0
 
@@ -17,9 +17,9 @@ LET_CLEAR=0
 usage () {
 	echo "$TOOL_NAME [options]"
 	echo "Options:"
-	echo "  -h, --help		  Display this help and exit"
-	echo "  -v, --version	   Display version and exit"
-	echo "  -c, --zhcn		  Display information with Chinese"
+	echo "  -h, --help		Display this help and exit"
+	echo "  -v, --version		Display version and exit"
+	echo "  -c, --zhcn		Display information with Chinese"
 	exit 0
 }
 
