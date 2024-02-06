@@ -269,21 +269,27 @@ get_char(){
 	stty \$SAVEDSTTY
 }
 
+trap 'echo -e "\n\033[31m\033[1m【 已强制退出脚本！ 】\033[0m\n"; exit 1' INT
+
+echo -e \"\\n【 开始同步 】\\n\"
+cd ${Local}
+echo -e \"【 添加本地文件 】\"
+git add ${Local}
+echo -e \"【 显示文件变化 】\"
+git status
+if ( [ "\$1" = "-m" ] || [ "\$1" = "-msg" ] ) && [ -n "\$2" ]; then
+    MSG="\$2"
+else
+    read -p \"请输入对本次上传的描述: \" MSG
+fi
+echo -e \"【 描述 】: \${MSG}\"
+echo -e \"【 请按任意键开始上传 】\"
+char=\`get_char\`
+echo -e \"【 更新本地仓库 】\"
+git commit -m \"\${MSG}\"
+
 EOF
 ) >>./git_sync
-
-echo echo -e \"\\n【 开始同步 】\\n\" >>./git_sync
-echo cd ${Local} >>./git_sync
-echo echo -e \"【 添加本地文件 】\" >>./git_sync
-echo git add ${Local} >>./git_sync
-echo echo -e \"【 显示文件变化 】\" >>./git_sync
-echo git status >>./git_sync
-echo read -p \"请输入对本次上传的描述: \" MSG >>./git_sync
-echo echo -e \"【 描述 】: \${MSG}\" >>./git_sync
-echo echo -e \"【 请按任意键开始上传 】\" >>./git_sync
-echo char=\`get_char\` >>./git_sync
-echo echo -e \"【 更新本地仓库 】\" >>./git_sync
-echo git commit -m \"\${MSG}\" >>./git_sync
 
 if [[ $gitee == "yes" ]]; then
     echo echo -e \"【 添加Gitee远程仓库 】\" >>./git_sync
@@ -311,6 +317,6 @@ echo echo -e \"\\n【 同步完成 】\\n\" >>./git_sync
 echo exit >>./git_sync
 chmod +x ./git_sync
 
-echo 【 已于目录${Local}生成“git_sync”文件，您下次进入目录输入“./git_sync”即可 】
+echo -e "【 已于目录${Local}生成“git_sync”文件，您下次进入目录运行“./git_sync”即可 】\n"
 
 exit
