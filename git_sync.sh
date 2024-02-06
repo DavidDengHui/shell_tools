@@ -14,7 +14,6 @@ get_char(){
 
 trap 'echo -e "\n\033[31m\033[1m【 已强制退出脚本！ 】\033[0m\n"; exit 1' INT
 
-# 初始化变量，默认为空或无意义值
 gitee_choice=""
 github_choice=""
 Local=""
@@ -23,7 +22,6 @@ Email=""
 Repo=""
 MSG=""
 
-# 使用循环和case语句处理参数
 while [[ $# -gt 0 ]]; do
     case $1 in
         -ge|--gitee)
@@ -63,21 +61,9 @@ while [[ $# -gt 0 ]]; do
             exit 1
             ;;
     esac
-    shift # 移动到下一个参数
+    shift
 done
 
-# 现在变量已经被正确赋值
-echo "Gitee Choice: $gitee_choice"
-echo "GitHub Choice: $github_choice"
-echo "Local: $Local"
-echo "User: $User"
-echo "Email: $Email"
-echo "Repo: $Repo"
-echo "Message: $MSG"
-
-echo -e "\n【 初始化操作 】\n"
-
-# 询问用户是否使用 Gitee 服务
 in1=true
 while true; do
     if [ -n "$gitee_choice" ] && $in1; then
@@ -93,7 +79,6 @@ while true; do
     esac
 done
 
-# 询问用户是否使用 GitHub 服务
 in1=true
 while true; do
     if [ -n "$github_choice" ] && $in1; then
@@ -109,7 +94,6 @@ while true; do
     esac
 done
 
-# 判断并执行相应操作
 if [[ $gitee == "no" && $github == "no" ]]; then
     echo -e "\n【 没有需要进行的操作！ 】\n"
     exit 0
@@ -131,9 +115,7 @@ if [[ $github == "yes" ]]; then
     echo -e "ssh -T git@gitee.com"
     echo -e "如果提示信任远程服务密钥，请输入 yes 继续！"
     echo -e "如果提示输入密码，并且密码确认无效，请 Ctrl+C 退出脚本，检查是否挂有网络代理！"
-    # 执行 ssh -T git@github.com 并获取输出
     output=$(ssh -T git@github.com 2>&1)
-    # 检查输出中是否包含 "successfully"
     if echo "$output" | grep -iq 'successfully'; then
         echo -e "\033[32m\033[1m成功:\033[0m \033[32mGitHub 服务远程通道正常！\033[0m"
     else
@@ -223,7 +205,7 @@ EOF
 fi
 
 echo -e "【 添加本地文件 】"
-git add ${Local}
+git add "${Local}"
 echo -e "【 显示文件变化 】"
 git status
 echo -e "【 请按任意键开始上传 】"
@@ -274,7 +256,7 @@ trap 'echo -e "\n\033[31m\033[1m【 已强制退出脚本！ 】\033[0m\n"; exit
 echo -e "\n【 开始同步 】\n"
 cd ${Local}
 echo -e "【 添加本地文件 】"
-git add ${Local}
+git add "${Local}"
 echo -e "【 显示文件变化 】"
 git status
 if ( [ "\$1" = "-m" ] || [ "\$1" = "-msg" ] ) && [ -n "\$2" ]; then
