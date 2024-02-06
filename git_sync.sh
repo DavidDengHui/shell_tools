@@ -12,7 +12,65 @@ get_char(){
         stty $SAVEDSTTY
 }
 
-echo -e "\n【 开始同步 】\n"
+echo -e "\n【 初始化操作 】\n"
+
+# 询问用户是否使用 Gitee 服务
+while true; do
+    read -p "您是否需要使用 Gitee 服务？ (请回答 yes 或者 no, 默认 yes): " gitee_choice
+    gitee_choice=${gitee_choice:-y}
+    case $gitee_choice in
+        [Yy]* ) gitee=yes; break;;
+        [Nn]* ) gitee=no; break;;
+        * ) echo -e "\n【 错误！请留空 或者输入 yes 或 y 或 on 或 n 】\n"; continue;;
+    esac
+done
+
+# 询问用户是否使用 GitHub 服务
+while true; do
+    read -p "您是否需要使用 GitHub 服务？ (请回答 yes 或者 no, 默认 yes): " github_choice
+    github_choice=${github_choice:-y}
+    case $github_choice in
+        [Yy]* ) github=yes; break;;
+        [Nn]* ) github=no; break;;
+        * ) echo -e "\n【 错误！请留空 或者输入 yes 或 y 或 on 或 n 】\n"; continue;;
+    esac
+done
+
+# 判断并执行相应操作
+if [[ $gitee == "no" && $github == "no" ]]; then
+    echo -e "\n【 没有需要进行的操作！ 】\n"
+    exit 0
+fi
+
+if [[ $gitee == "yes" ]]; then
+    echo -e "\n【 尝试连接 Gitee 服务... 】\n"
+    echo -e "ssh -T git@gitee.com"
+    echo -e "如果提示信任远程服务密钥，请输入 yes 继续！"
+    if ssh -T git@gitee.com &>/dev/null; then
+        echo -e "\033[32m\033[1m成功:\033[0m \033[32mGitee 服务远程通道正常！\033[0m"
+    else
+        echo -e "\033[31m\033[1m错误:\033[0m \033[31m请配置 Gitee 密钥后重试！\033[0m"
+    fi
+fi
+
+if [[ $github == "yes" ]]; then
+    echo -e "\n【 尝试连接 GitHub 服务... 】\n"
+    echo -e "ssh -T git@gitee.com"
+    echo -e "如果提示信任远程服务密钥，请输入 yes 继续！"
+    echo -e "如果提示输入密码，并且密码确认无效，请 Ctrl+C 退出脚本，检查是否挂有网络代理！"
+    # 执行 ssh -T git@github.com 并获取输出
+    output=$(ssh -T git@github.com 2>&1)
+    # 检查输出中是否包含 "successfully"
+    if echo "$output" | grep -iq 'successfully'; then
+        echo -e "\033[32m\033[1m成功:\033[0m \033[32mGitHub 服务远程通道正常！\033[0m"
+    else
+        echo -e "\033[31m\033[1m错误:\033[0m \033[31m请配置 GitHub 密钥或断开代理后重试！\033[0m"
+    fi
+fi
+
+echo -e "\n注意: 如果以上操作中有\033[31m\033[1m错误\033[0m提示，\n      请使用 Ctrl+C 退出修正后重试！\n "
+echo -e "【 请按任意键开始设置仓库 】"
+char=`get_char`
 
 read -p "请输入本地文件夹路径: " Local
 read -p "请输入远程仓库用户名: " User
@@ -21,6 +79,9 @@ read -p "请输入远程仓库名: " Name
 read -p "请输入对本次上传的描述: " MSG
 SSH="git@github.com:"${User}"/"${Name}".git"
 SSH2="git@gitee.com:"${User}"/"${Name}".git"
+
+echo -e "\n【 请按任意键开始初始化仓库 】"
+char=`get_char`
 
 cd ${Local}
 
@@ -72,29 +133,32 @@ echo -e "【 添加本地文件 】"
 git add ${Local}
 echo -e "【 显示文件变化 】"
 git status
-echo -e "【请按任意键继续】"
+echo -e "【 请按任意键开始上传 】"
 char=`get_char`
 echo -e "【 更新本地仓库 】"
 git commit -m "${MSG}"
 
-echo -e "【 添加Gitee远程仓库 】"
-git remote add ${Name} ${SSH2}
-echo -e "【 添加Gitee远程链接 】"
-git remote set-url ${Name} ${SSH2}
-echo -e "【 上传Gitee远程仓库 】"
-git push -u ${Name} +master
-echo -e "【 删除Gitee远程缓存 】"
-git remote rm ${Name}
+if [[ $gitee == "yes" ]]; then
+    echo -e "【 添加Gitee远程仓库 】"
+    git remote add ${Name} ${SSH2}
+    echo -e "【 添加Gitee远程链接 】"
+    git remote set-url ${Name} ${SSH2}
+    echo -e "【 上传Gitee远程仓库 】"
+    git push -u ${Name} +master
+    echo -e "【 删除Gitee远程缓存 】"
+    git remote rm ${Name}
+fi
 
-
-echo -e "【 添加Github远程仓库 】"
-git remote add ${Name} ${SSH}
-echo -e "【 添加Github远程链接 】"
-git remote set-url ${Name} ${SSH}
-echo -e "【 上传Github远程仓库 】"
-git push -u ${Name} +master
-echo -e "【 删除Github远程缓存 】"
-git remote rm ${Name}
+if [[ $github == "yes" ]]; then
+    echo -e "【 添加Github远程仓库 】"
+    git remote add ${Name} ${SSH}
+    echo -e "【 添加Github远程链接 】"
+    git remote set-url ${Name} ${SSH}
+    echo -e "【 上传Github远程仓库 】"
+    git push -u ${Name} +master
+    echo -e "【 删除Github远程缓存 】"
+    git remote rm ${Name}
+fi
 
 echo -e "\n【 同步完成 】\n"
 
@@ -114,6 +178,7 @@ get_char(){
 
 EOF
 ) >>./git_sync
+
 echo echo -e \"\\n【 开始同步 】\\n\" >>./git_sync
 echo cd ${Local} >>./git_sync
 echo echo -e \"【 添加本地文件 】\" >>./git_sync
@@ -121,29 +186,33 @@ echo git add ${Local} >>./git_sync
 echo echo -e \"【 显示文件变化 】\" >>./git_sync
 echo git status >>./git_sync
 echo read -p \"请输入对本次上传的描述: \" MSG >>./git_sync
-echo echo -e \"【描述】: \${MSG}\" >>./git_sync
-echo echo -e \"【请按任意键继续】\" >>./git_sync
+echo echo -e \"【 描述 】: \${MSG}\" >>./git_sync
+echo echo -e \"【 请按任意键开始上传 】\" >>./git_sync
 echo char=\`get_char\` >>./git_sync
 echo echo -e \"【 更新本地仓库 】\" >>./git_sync
 echo git commit -m \"\${MSG}\" >>./git_sync
 
-echo echo -e \"【 添加Gitee远程仓库 】\" >>./git_sync
-echo git remote add ${Name} ${SSH2} >>./git_sync
-echo echo -e \"【 添加Gitee远程链接 】\" >>./git_sync
-echo git remote set-url ${Name} ${SSH2} >>./git_sync
-echo echo -e \"【 上传Gitee远程仓库 】\" >>./git_sync
-echo git push -u ${Name} +master >>./git_sync
-echo echo -e \"【 删除Gitee远程缓存 】\" >>./git_sync
-echo git remote rm ${Name} >>./git_sync
+if [[ $gitee == "yes" ]]; then
+    echo echo -e \"【 添加Gitee远程仓库 】\" >>./git_sync
+    echo git remote add ${Name} ${SSH2} >>./git_sync
+    echo echo -e \"【 添加Gitee远程链接 】\" >>./git_sync
+    echo git remote set-url ${Name} ${SSH2} >>./git_sync
+    echo echo -e \"【 上传Gitee远程仓库 】\" >>./git_sync
+    echo git push -u ${Name} +master >>./git_sync
+    echo echo -e \"【 删除Gitee远程缓存 】\" >>./git_sync
+    echo git remote rm ${Name} >>./git_sync
+fi
 
-echo echo -e \"【 添加Github远程仓库 】\" >>./git_sync
-echo git remote add ${Name} ${SSH} >>./git_sync
-echo echo -e \"【 添加Github远程链接 】\" >>./git_sync
-echo git remote set-url ${Name} ${SSH} >>./git_sync
-echo echo -e \"【 上传Github远程仓库 】\" >>./git_sync
-echo git push -u ${Name} +master >>./git_sync
-echo echo -e \"【 删除Github远程缓存 】\" >>./git_sync
-echo git remote rm ${Name} >>./git_sync
+if [[ $github == "yes" ]]; then
+    echo echo -e \"【 添加Github远程仓库 】\" >>./git_sync
+    echo git remote add ${Name} ${SSH} >>./git_sync
+    echo echo -e \"【 添加Github远程链接 】\" >>./git_sync
+    echo git remote set-url ${Name} ${SSH} >>./git_sync
+    echo echo -e \"【 上传Github远程仓库 】\" >>./git_sync
+    echo git push -u ${Name} +master >>./git_sync
+    echo echo -e \"【 删除Github远程缓存 】\" >>./git_sync
+    echo git remote rm ${Name} >>./git_sync
+fi
 
 echo echo -e \"\\n【 同步完成 】\\n\" >>./git_sync
 echo exit >>./git_sync
@@ -152,4 +221,3 @@ chmod +x ./git_sync
 echo 【 已于目录${Local}生成“git_sync”文件，您下次进入目录输入“./git_sync”即可 】
 
 exit
-
