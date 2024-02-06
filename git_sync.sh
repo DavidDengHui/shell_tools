@@ -26,13 +26,14 @@ cd ${Local}
 
 (
 cat <<EOF
+
 # The following file types do not need to be uploaded
 *.swp
 *.inf.php
 inf.php
 git_sync
 EOF
-) >.gitignore
+) >> .gitignore
 
 
 if [ ! -d "./git_sync" ]; then
