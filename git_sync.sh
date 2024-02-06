@@ -12,6 +12,8 @@ get_char(){
         stty $SAVEDSTTY
 }
 
+trap 'echo -e "\n\033[31m\033[1m【 已强制退出脚本！ 】\033[0m\n"; exit 1' INT
+
 echo -e "\n【 初始化操作 】\n"
 
 # 询问用户是否使用 Gitee 服务
