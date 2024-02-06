@@ -284,7 +284,7 @@ else
 fi
 echo -e "【 描述 】: \${MSG}"
 echo -e "【 请按任意键开始上传 】"
-char=`get_char`
+char=\`get_char\`
 echo -e "【 更新本地仓库 】"
 git commit -m "\${MSG}"
 
