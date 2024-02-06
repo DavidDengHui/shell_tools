@@ -271,22 +271,22 @@ get_char(){
 
 trap 'echo -e "\n\033[31m\033[1m【 已强制退出脚本！ 】\033[0m\n"; exit 1' INT
 
-echo -e \"\\n【 开始同步 】\\n\"
+echo -e "\n【 开始同步 】\n"
 cd ${Local}
-echo -e \"【 添加本地文件 】\"
+echo -e "【 添加本地文件 】"
 git add ${Local}
-echo -e \"【 显示文件变化 】\"
+echo -e "【 显示文件变化 】"
 git status
 if ( [ "\$1" = "-m" ] || [ "\$1" = "-msg" ] ) && [ -n "\$2" ]; then
     MSG="\$2"
 else
-    read -p \"请输入对本次上传的描述: \" MSG
+    read -p "请输入对本次上传的描述: " MSG
 fi
-echo -e \"【 描述 】: \${MSG}\"
-echo -e \"【 请按任意键开始上传 】\"
-char=\`get_char\`
-echo -e \"【 更新本地仓库 】\"
-git commit -m \"\${MSG}\"
+echo -e "【 描述 】: \${MSG}"
+echo -e "【 请按任意键开始上传 】"
+char=`get_char`
+echo -e "【 更新本地仓库 】"
+git commit -m "\${MSG}"
 
 EOF
 ) >>./git_sync
