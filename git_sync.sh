@@ -162,12 +162,13 @@ cd ${Local}
 
 (
 cat <<EOF
-
 # The following file types do not need to be uploaded
+.git
+.vscode
+.DS_Store
 *.swp
-*.inf.php
-inf.php
-git_sync
+*inf.php
+git_sync*
 EOF
 ) >> .gitignore
 
